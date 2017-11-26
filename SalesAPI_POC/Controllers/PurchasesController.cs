@@ -17,6 +17,49 @@ namespace SalesAPI_POC.Controllers
     {
         private SalesAPI_POCContext db = new SalesAPI_POCContext();
 
+        [HttpGet]
+        [Route("api/purchases/TotalPurchase")]
+        public async Task<IHttpActionResult> GetTotalPurchase()
+        {
+            var query = from p in db.Products
+                        select new
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                            Description = p.Description,
+                            TotalSalesCount = p.Purchase.Count(),
+                            TotalSalesAmount = p.Purchase.Count() * p.Price,
+                            CreatedDate = p.CreatedDate,
+                            ModifiedDate = p.ModifiedDate
+                        };
+
+            return Ok(await query.ToListAsync());
+        }
+
+        [HttpGet]
+        [Route("api/purchases/TotalPurchase")]
+        public async Task<IHttpActionResult> GetTotalPurchase(int? productId)
+        {
+            var product = await db.Products.FindAsync(productId);
+
+            if (product == null)
+                return NotFound();
+
+            var query = from p in db.Products
+                        where p.Id == productId
+                        select new
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                            Description = p.Description,
+                            TotalSalesCount = p.Purchase.Count(),
+                            TotalSalesAmount = p.Purchase.Count() * p.Price,                            
+                            CreatedDate = p.CreatedDate,
+                            ModifiedDate = p.ModifiedDate
+                        };
+
+            return Ok(await query.FirstOrDefaultAsync());
+        }
         // GET: api/Purchases
         public IQueryable<Purchase> GetPurchases()
         {
